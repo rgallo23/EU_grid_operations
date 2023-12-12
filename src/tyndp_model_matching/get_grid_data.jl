@@ -7,13 +7,18 @@
 # Function to extract ntcs, nodes, generation capacity,
 # demand time series and list of generator types
 # scenario{String}, e.g. "NT2025"
-function get_grid_data(scenario)    
+function get_grid_data(scenario)  
+# Path of data source
+path = "C:/Users/rgalloca/Desktop/Ricardo/EU_data_source"   
 # data source: https://www.entsoe.eu/Documents/TYNDP%20documents/TYNDP2020/Reference%20Grid%202025%20-%20TYNDP%202020.xlsx    
 file_lines = "./data_sources/Reference Grid 2025 - TYNDP 2020.xls"
+#file_lines = string(path,"/Reference Grid 2025 - TYNDP 2020.xls")
 # data source: https://2020.entsos-tyndp-scenarios.eu/wp-content/uploads/2020/06/TYNDP-2020-Scenario-Datafile.xlsx.zip
 file_data = "./data_sources/TYNDP-2020-Scenario-Datafile.xls"
+#file_data = string(path,"/TYNDP-2020-Scenario-Datafile.xls")
 # data source for all demand time series: https://tyndp.entsoe.eu/maps-data 
 file_demand = "./data_sources/"*scenario*"_Demand_CY1984.csv"
+#file_demand = string(path,"/"*scenario*"_Demand_CY1984.csv")
 
 # Create dataframes from CSV/XLS files
 ntcs = _DF.DataFrame(_EF.load(file_lines, "2025"))

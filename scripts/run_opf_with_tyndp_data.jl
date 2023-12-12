@@ -1,10 +1,11 @@
 # Script to test the European grid
 using PowerModels; const _PM = PowerModels
 using PowerModelsACDC; const _PMACDC = PowerModelsACDC
-using EU_grid_operations; const _EUGO = EU_grid_operations
+#using EU_grid_operations; const _EUGO = EU_grid_operations
 using Gurobi
 using JSON
 
+include("functions.jl")
 
 ## Import required functions - Some of them in later stages.....
 import Ipopt
@@ -23,6 +24,8 @@ using Statistics
 using Clustering
 using StatsBase
 import StatsPlots
+
+using EU_grid_operations
 
 ######### DEFINE INPUT PARAMETERS
 scenario = "GA2030"
@@ -44,33 +47,46 @@ output_file_name = joinpath("results", join([use_case,"_",scenario,"_", climate_
 gurobi = Gurobi.Optimizer
 EU_grid = _PM.parse_file(file)
 _PMACDC.process_additional_data!(EU_grid)
-_EUGO.add_load_and_pst_properties!(EU_grid)
+
+#include("../src/tyndp_model_matching/data.jl")
+
+add_load_and_pst_properties!(EU_grid)
 
 #### LOAD TYNDP SCENARIO DATA ##########
 if load_data == true
-    zonal_result, zonal_input, scenario_data = _EUGO.load_results(scenario, climate_year) # Import zonal results
-    ntcs, zones, arcs, tyndp_capacity, tyndp_demand, gen_types, gen_costs, emission_factor, inertia_constants, start_up_cost, node_positions = _EUGO.get_grid_data(scenario) # import zonal input (mainly used for cost data)
-    pv, wind_onshore, wind_offshore = _EUGO.load_res_data()
+    zonal_result, zonal_input, scenario_data = load_results(scenario, climate_year) # Import zonal results
+    ntcs, zones, arcs, tyndp_capacity, tyndp_demand, gen_types, gen_costs, emission_factor, inertia_constants, start_up_cost, node_positions = get_grid_data(scenario) # import zonal input (mainly used for cost data)
+    pv, wind_onshore, wind_offshore = load_res_data()
 end
+
+# if load_data == true
+#     zonal_result, zonal_input, scenario_data = _EUGO.load_results(scenario, climate_year) # Import zonal results
+#     ntcs, zones, arcs, tyndp_capacity, tyndp_demand, gen_types, gen_costs, emission_factor, inertia_constants, start_up_cost, node_positions = _EUGO.get_grid_data(scenario) # import zonal input (mainly used for cost data)
+#     pv, wind_onshore, wind_offshore = _EUGO.load_res_data()
+# end
 
 print("ALL FILES LOADED", "\n")
 print("----------------------","\n")
 ######
 
 # map EU-Grid zones to TYNDP model zones
-zone_mapping = _EUGO.map_zones()
+zone_mapping = map_zones()
+#zone_mapping = _EUGO.map_zones()
 
 # Scale generation capacity based on TYNDP data
-_EUGO.scale_generation!(tyndp_capacity, EU_grid, scenario, climate_year, zone_mapping)
+scale_generation!(tyndp_capacity, EU_grid, scenario, climate_year, zone_mapping)
+#_EUGO.scale_generation!(tyndp_capacity, EU_grid, scenario, climate_year, zone_mapping)
 
 # Isolate zone: input is vector of strings, if you need to relax the fixing border flow assumptions use:
 # _EUGO.isolate_zones(EU_grid, ["DE"]; border_slack = x), this will leas to (1-slack)*xb_flow_ref < xb_flow < (1+slack)*xb_flow_ref
-zone_grid = _EUGO.isolate_zones(EU_grid, ["DE"])
+#zone_grid = _EUGO.isolate_zones(EU_grid, ["DE"])
+zone_grid = isolate_zones(EU_grid, ["DE"])
 
 # create RES time series based on the TYNDP model for 
 # (1) all zones, e.g.  create_res_time_series(wind_onshore, wind_offshore, pv, zone_mapping) 
 # (2) a specified zone, e.g. create_res_time_series(wind_onshore, wind_offshore, pv, zone_mapping; zone = "DE")
-timeseries_data = _EUGO.create_res_and_demand_time_series(wind_onshore, wind_offshore, pv, scenario_data, zone_mapping; zone = "DE")
+timeseries_data = create_res_and_demand_time_series(wind_onshore, wind_offshore, pv, scenario_data, zone_mapping; zone = "DE")
+#timeseries_data = _EUGO.create_res_and_demand_time_series(wind_onshore, wind_offshore, pv, scenario_data, zone_mapping; zone = "DE")
 
 push!(timeseries_data, "xb_flows" => _EUGO.get_xb_flows(zone_grid, zonal_result, zonal_input, zone_mapping)) 
 

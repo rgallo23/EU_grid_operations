@@ -12,9 +12,16 @@ function load_res_data()
  # pv_file_link = "https://zenodo.org/record/3702418/files/PECD-MAF2019-wide-PV.feather?download=1" 
 
  # If files are saved locally under folder scenarios
- file_wind_onshore  = "./data_sources/PECD-MAF2019-wide-WindOnshore.feather"
- file_wind_offshore = "./data_sources/PECD-MAF2019-wide-WindOffshore.feather"
- file_pv            = "./data_sources/PECD-MAF2019-wide-PV.feather"                 
+ # Path of data source
+ path = "C:/Users/rgalloca/Desktop/Ricardo/EU_data_source" 
+
+ file_wind_onshore  = "C:/Users/rgalloca/Desktop/Ricardo/EU_data_source/PECD-MAF2019-wide-WindOnshore.feather"
+ file_wind_offshore = "C:/Users/rgalloca/Desktop/Ricardo/EU_data_source/PECD-MAF2019-wide-WindOffshore.feather"
+ file_pv            = "C:/Users/rgalloca/Desktop/Ricardo/EU_data_source/PECD-MAF2019-wide-PV.feather" 
+ #file_pv            = joinpath(path,"/PECD-MAF2019-wide-PV.feather")    
+#  file_wind_onshore  = "./data_sources/PECD-MAF2019-wide-WindOnshore.feather"
+#  file_wind_offshore = "./data_sources/PECD-MAF2019-wide-WindOffshore.feather"
+#  file_pv            = "./data_sources/PECD-MAF2019-wide-PV.feather"              
 
  pv = Feather.read(file_pv) 
  wind_onshore = Feather.read(file_wind_onshore)
@@ -54,7 +61,10 @@ function process_RES_time_series(wind_onshore,wind_offshore,pv,corrected_year) #
 end
 
 function add_load_series(scenario,year,hour_start,number_of_hours)
-    load_file = joinpath("/Users/giacomobastianel/Desktop/tyndpdata/scenarios/"*scenario*"_Demand_CY"*year*".csv")
+     # Path of data source
+    path = "C:/Users/rgalloca/Desktop/Ricardo/EU_data_source" 
+    #load_file = joinpath("/Users/giacomobastianel/Desktop/tyndpdata/scenarios/"*scenario*"_Demand_CY"*year*".csv")
+    load_file = joinpath(path,"/"*scenario*"_Demand_CY"*year*".csv")  # Check path
     df = CSV.read(load_file,DataFrame)
     demand_zones = Dict{String,Any}()
     for l in 5:length(names(df))

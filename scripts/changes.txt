@@ -1,0 +1,6 @@
+Tracking of changes
+
+-- Creation of script "functions.jl" to replace the EU_grid package as it was not being correctly loaded.
+-- Replacement of all _EU.xx to the name of the functions.
+-- Creation of folders data and results to have them in a separate directory.
+-- Changes to the data and results path to match the actual location of the files.

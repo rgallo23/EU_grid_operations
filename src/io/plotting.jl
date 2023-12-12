@@ -183,7 +183,7 @@ function plot_marginal_zonal_prices(result, input_data, file_name; zones = nothi
 
     print("Calculating and printing zonal marginal prices", "\n")
     print("-----------------------","\n")
-
+    
     if isnothing(zones)
         zones = [load["node"] for (l, load) in input_data["load"]]
     end

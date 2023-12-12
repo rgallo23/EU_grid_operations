@@ -22,8 +22,12 @@ import InfrastructureModels; const _IM = InfrastructureModels
 import JSON
 import CbaOPF
 import Plots
-using EU_grid_operations; const _EUGO = EU_grid_operations
+using Ipopt
+
+#using EU_grid_operations; const _EUGO = EU_grid_operations
+include("functions.jl")
 gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer)
+ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer)
 
 # Add auxiliary functions to construct input and scenario data dictionary
 
@@ -45,15 +49,20 @@ co2_cost = 45
 
 # Load grid and scenario data
 if fetch_data == true
-    pv, wind_onshore, wind_offshore = _EUGO.load_res_data()
-    ntcs, nodes, arcs, capacity, demand, gen_types, gen_costs, emission_factor, inertia_constants, node_positions = _EUGO.get_grid_data(scenario)
+    pv, wind_onshore, wind_offshore = load_res_data()
+    ntcs, nodes, arcs, capacity, demand, gen_types, gen_costs, emission_factor, inertia_constants, node_positions = get_grid_data(scenario)
 end
+# if fetch_data == true
+#   pv, wind_onshore, wind_offshore = _EUGO.load_res_data()
+#   ntcs, nodes, arcs, capacity, demand, gen_types, gen_costs, emission_factor, inertia_constants, node_positions = _EUGO.get_grid_data(scenario)
+# end
 
 # Construct input data dictionary in PowerModels style 
 # Construct RES time and demand series, installed capacities on nodal (zonal) data
-input_data, nodal_data = _EUGO.construct_data_dictionary(ntcs, capacity, nodes, demand, scenario, climate_year, gen_types, pv, wind_onshore, wind_offshore, gen_costs, emission_factor, inertia_constants, node_positions; co2_cost = 50.0)
-
-_EUGO.add_north_sea_wind_zonal!(input_data, nodal_data, ns_wind_power, co2_cost; branch_cap = 150e3)
+input_data, nodal_data = construct_data_dictionary(ntcs, capacity, nodes, demand, scenario, climate_year, gen_types, pv, wind_onshore, wind_offshore, gen_costs, emission_factor, inertia_constants, node_positions; co2_cost = 50.0)
+#input_data, nodal_data = _EUGO.construct_data_dictionary(ntcs, capacity, nodes, demand, scenario, climate_year, gen_types, pv, wind_onshore, wind_offshore, gen_costs, emission_factor, inertia_constants, node_positions; co2_cost = 50.0)
+add_north_sea_wind_zonal!(input_data, nodal_data, ns_wind_power, co2_cost; branch_cap = 150e3)
+#_EUGO.add_north_sea_wind_zonal!(input_data, nodal_data, ns_wind_power, co2_cost; branch_cap = 150e3)
 input_data_raw = deepcopy(input_data)
 
 number_of_hours = 8760
@@ -62,9 +71,11 @@ result = Dict{String, Any}("$hour" => nothing for hour in 1:number_of_hours)
 for hour = 1:number_of_hours
     print("Hour ", hour, " of ", number_of_hours, "\n")
     # Write time series data into input data dictionary
-    _EUGO.prepare_hourly_data!(input_data, nodal_data, hour)
+    prepare_hourly_data!(input_data, nodal_data, hour)
+    #_EUGO.prepare_hourly_data!(input_data, nodal_data, hour)
     # Solve Network Flow OPF using PowerModels
     result["$hour"] = _PM.solve_opf(input_data, PowerModels.NFAPowerModel, gurobi) 
+    #result["$hour"] = _PM.solve_opf(input_data, PowerModels.NFAPowerModel, ipopt) #Changed to Ipopt due to license
 end
 
 ## Write out JSON files
