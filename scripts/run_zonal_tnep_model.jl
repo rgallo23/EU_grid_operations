@@ -22,7 +22,8 @@ import InfrastructureModels; const _IM = InfrastructureModels
 import JSON
 import CbaOPF
 import Plots
-using EU_grid_operations; const _EUGO = EU_grid_operations
+#using EU_grid_operations; const _EUGO = EU_grid_operations
+include("functions.jl") #Placeholder until making _EUGO work
 gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer)
 
 # Add auxiliary functions to construct input and scenario data dictionary
@@ -41,25 +42,33 @@ fetch_data = true
 hours = 1:24
 
 # Load grid and scenario data
+#=
 if fetch_data == true
     pv, wind_onshore, wind_offshore = _EUGO.load_res_data()
     ntcs, nodes, arcs, capacity, demand, gen_types, gen_costs, emission_factor, inertia_constants, node_positions = _EUGO.get_grid_data(scenario)
 end
+=#
+if fetch_data == true
+    pv, wind_onshore, wind_offshore = load_res_data()
+    ntcs, nodes, arcs, capacity, demand, gen_types, gen_costs, emission_factor, inertia_constants, node_positions = get_grid_data(scenario)
+end
 
 # Construct input data dictionary in PowerModels style 
 # Construct RES time and demand series, installed capacities on nodal (zonal) data
-input_data, nodal_data = _EUGO.construct_data_dictionary(ntcs, capacity, nodes, demand, scenario, climate_year, gen_types, pv, wind_onshore, wind_offshore, gen_costs, emission_factor, inertia_constants, node_positions)
+#input_data, nodal_data = _EUGO.construct_data_dictionary(ntcs, capacity, nodes, demand, scenario, climate_year, gen_types, pv, wind_onshore, wind_offshore, gen_costs, emission_factor, inertia_constants, node_positions)
+input_data, nodal_data = construct_data_dictionary(ntcs, capacity, nodes, demand, scenario, climate_year, gen_types, pv, wind_onshore, wind_offshore, gen_costs, emission_factor, inertia_constants, node_positions)
 
 input_data_raw = deepcopy(input_data)
 
 
 for (b, branch) in input_data["branch"]
     branch["delta_cap_max"] = branch["rate_a"] * 2 # for testing.....
-    distance = _EUGO.latlon2distance(input_data, branch)
+    #distance = _EUGO.latlon2distance(input_data, branch)
+    distance = latlon2distance(input_data, branch)
     branch["capacity_cost"] = 300e5 * input_data["baseMVA"] / (25 * 8760) # for testing, update with more realistic numbers.....
 end
 
-# input_data["branch"]["173"]["rate_a"] = input_data["branch"]["173"]["rate_a"] * 2
+# input_data["branch"]["173"]["rate_a"] = input_data["branch"]["173"]["rate_a"] * 2  #Already commented
 
 for (l, load) in input_data["load"]
     load["pred_rel_max"] = 0
@@ -72,11 +81,12 @@ end
 # Create dictionary for writing out results
 print("######################################", "\n")
 print("####### PREPARING DATA      ##########", "\n")
-@time mn_input_data = _EUGO.prepare_mn_data(input_data, nodal_data, hours)
+#@time mn_input_data = _EUGO.prepare_mn_data(input_data, nodal_data, hours)
+@time mn_input_data = prepare_mn_data(input_data, nodal_data, hours)
 
 print("######################################", "\n")
 print("####### STARTING OPTIMISATION#### ####", "\n")
-@time result = CbaOPF.solve_zonal_tnep(mn_input_data, _PM.NFAPowerModel, gurobi; multinetwork = true) 
+@time result = CbaOPF.solve_zonal_tnep(mn_input_data, _PM.NFAPowerModel, gurobi; multinetwork = true)
 
 
 cap  = zeros(1, maximum(parse.(Int, collect(keys(input_data["branch"])))))

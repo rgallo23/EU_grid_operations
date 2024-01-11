@@ -1,7 +1,8 @@
 # Script to test the European grid
 using PowerModels; const _PM = PowerModels
 using PowerModelsACDC; const _PMACDC = PowerModelsACDC
-using EU_grid_operations; const _EUGO = EU_grid_operations
+#using EU_grid_operations; const _EUGO = EU_grid_operations
+include("functions.jl") #Placeholder until making _EUGO work
 using Gurobi
 using JSON
 using PlotlyJS
@@ -39,16 +40,22 @@ number_of_clusters = 200
 hour_start_idx = 1
 hour_end_idx = 8760
 batch_size = 365
+
 ############ LOAD EU grid data
 include("../src/core/batch_opf.jl")
 file = "./data_sources/European_grid.json"
-output_file_name = joinpath("results", join([use_case,"_",scenario,"_", climate_year]))
-output_file_name_inv = joinpath("results", join([use_case,"_",scenario,"_", climate_year,"_inv"]))
-plot_file_name = joinpath("results", "de_grid.pdf")
+results_path = "/Users/rgalloca/Desktop/EU_results/"  # Local path to results folder
+output_file_name = joinpath(results_path, join([use_case,"_",scenario,"_", climate_year]))
+output_file_name_inv = joinpath(results_path, join([use_case,"_",scenario,"_", climate_year,"_inv"]))
+plot_file_name = joinpath(results_path, "de_grid.pdf")
+# output_file_name = joinpath("results", join([use_case,"_",scenario,"_", climate_year]))
+# output_file_name_inv = joinpath("results", join([use_case,"_",scenario,"_", climate_year,"_inv"]))
+# plot_file_name = joinpath("results", "de_grid.pdf")
 gurobi = Gurobi.Optimizer
 EU_grid = _PM.parse_file(file)
 _PMACDC.process_additional_data!(EU_grid)
-_EUGO.add_load_and_pst_properties!(EU_grid)
+add_load_and_pst_properties!(EU_grid)
+#_EUGO.add_load_and_pst_properties!(EU_grid)
 
 #### LOAD TYNDP SCENARIO DATA ##########
 if load_data == true

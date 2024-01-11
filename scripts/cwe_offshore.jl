@@ -1,7 +1,8 @@
 # Script to test the European grid
 using PowerModels; const _PM = PowerModels
 using PowerModelsACDC; const _PMACDC = PowerModelsACDC
-using EU_grid_operations; const _EUGO = EU_grid_operations
+#using EU_grid_operations; const _EUGO = EU_grid_operations
+include("functions.jl") #Placeholder until making _EUGO work
 using Gurobi
 using JSON
 
@@ -38,13 +39,21 @@ output_file_name = joinpath("results", join([use_case,"_",scenario,"_", climate_
 gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer, "OutputFlag" => 0)
 EU_grid = _PM.parse_file(file)
 _PMACDC.process_additional_data!(EU_grid)
-_EUGO.add_load_and_pst_properties!(EU_grid)
+#_EUGO.add_load_and_pst_properties!(EU_grid)
+add_load_and_pst_properties!(EU_grid)
 
 #### LOAD TYNDP SCENARIO DATA ##########
+#=
 if load_data == true
     zonal_result, zonal_input, scenario_data = _EUGO.load_results(scenario, climate_year; file_name = "NSOW_zonal") # Import zonal results
     ntcs, zones, arcs, tyndp_capacity, tyndp_demand, gen_types, gen_costs, emission_factor, inertia_constants, start_up_cost, node_positions = _EUGO.get_grid_data(scenario) # import zonal input (mainly used for cost data)
     pv, wind_onshore, wind_offshore = _EUGO.load_res_data()
+end
+=#
+if load_data == true
+    zonal_result, zonal_input, scenario_data = load_results(scenario, climate_year; file_name = "NSOW_zonal") # Import zonal results
+    ntcs, zones, arcs, tyndp_capacity, tyndp_demand, gen_types, gen_costs, emission_factor, inertia_constants, start_up_cost, node_positions = get_grid_data(scenario) # import zonal input (mainly used for cost data)
+    pv, wind_onshore, wind_offshore = _load_res_data()
 end
 print("ALL FILES LOADED", "\n")
 print("----------------------","\n")

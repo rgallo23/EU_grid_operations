@@ -25,7 +25,7 @@ using Clustering
 using StatsBase
 import StatsPlots
 
-using EU_grid_operations
+#using EU_grid_operations
 
 ######### DEFINE INPUT PARAMETERS
 scenario = "GA2030"

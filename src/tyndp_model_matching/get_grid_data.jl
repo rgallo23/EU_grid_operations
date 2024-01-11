@@ -7,6 +7,7 @@
 # Function to extract ntcs, nodes, generation capacity,
 # demand time series and list of generator types
 # scenario{String}, e.g. "NT2025"
+
 function get_grid_data(scenario)  
 # Path of data source
 path = "C:/Users/rgalloca/Desktop/Ricardo/EU_data_source"   

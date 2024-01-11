@@ -15,10 +15,10 @@ function load_res_data()
  # Path of data source
  path = "C:/Users/rgalloca/Desktop/Ricardo/EU_data_source" 
 
- file_wind_onshore  = "C:/Users/rgalloca/Desktop/Ricardo/EU_data_source/PECD-MAF2019-wide-WindOnshore.feather"
- file_wind_offshore = "C:/Users/rgalloca/Desktop/Ricardo/EU_data_source/PECD-MAF2019-wide-WindOffshore.feather"
- file_pv            = "C:/Users/rgalloca/Desktop/Ricardo/EU_data_source/PECD-MAF2019-wide-PV.feather" 
- #file_pv            = joinpath(path,"/PECD-MAF2019-wide-PV.feather")    
+ file_wind_onshore  = joinpath(path,"PECD-MAF2019-wide-WindOnshore.feather") 
+ file_wind_offshore = joinpath(path,"PECD-MAF2019-wide-WindOffshore.feather")
+ file_pv            = joinpath(path, "PECD-MAF2019-wide-PV.feather")   
+
 #  file_wind_onshore  = "./data_sources/PECD-MAF2019-wide-WindOnshore.feather"
 #  file_wind_offshore = "./data_sources/PECD-MAF2019-wide-WindOffshore.feather"
 #  file_pv            = "./data_sources/PECD-MAF2019-wide-PV.feather"              
@@ -26,6 +26,7 @@ function load_res_data()
  pv = Feather.read(file_pv) 
  wind_onshore = Feather.read(file_wind_onshore)
  wind_offshore = Feather.read(file_wind_offshore)
+
  # Alternatively one can use to download data: (this might take a couple of minutes)
  # pv = Feather.read(download(pv_file_link))
  # wind_onshore = Feather.read(download(wind_onshore_file_link))
@@ -64,7 +65,7 @@ function add_load_series(scenario,year,hour_start,number_of_hours)
      # Path of data source
     path = "C:/Users/rgalloca/Desktop/Ricardo/EU_data_source" 
     #load_file = joinpath("/Users/giacomobastianel/Desktop/tyndpdata/scenarios/"*scenario*"_Demand_CY"*year*".csv")
-    load_file = joinpath(path,"/"*scenario*"_Demand_CY"*year*".csv")  # Check path
+    load_file = joinpath(path, join([scenario,"_Demand_CY",year,".csv"]))
     df = CSV.read(load_file,DataFrame)
     demand_zones = Dict{String,Any}()
     for l in 5:length(names(df))
