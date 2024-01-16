@@ -1,9 +1,12 @@
 function load_results(scenario, climate_year; file_name = "result_zonal_tyndp")
    
-    results_path = "/Users/rgalloca/Desktop/EU_results/"  # Local path to results folder
-    result_file_name =   "./"*file_name*"_"*scenario*"_"*climate_year*".json"
-    input_file_name =    "./input_zonal_tyndp_"*scenario*"_"*climate_year*".json"
-    scenario_file_name = "./scenario_zonal_tyndp_"*scenario*"_"*climate_year*".json"
+    
+    results_path =  "/Users/rgalloca/Desktop/EU_results/" # Local path to results folder
+    
+
+    result_file_name =   join([results_path,"/"*file_name*"_"*scenario*"_"*climate_year*".json"])
+    input_file_name =    join([results_path,"/input_zonal_tyndp_"*scenario*"_"*climate_year*".json"])
+    scenario_file_name = join([results_path,"/scenario_zonal_tyndp_"*scenario*"_"*climate_year*".json"])
     # result_file_name =   "./results/"*file_name*"_"*scenario*"_"*climate_year*".json"
     # input_file_name =    "./results/input_zonal_tyndp_"*scenario*"_"*climate_year*".json"
     # scenario_file_name = "./results/scenario_zonal_tyndp_"*scenario*"_"*climate_year*".json"

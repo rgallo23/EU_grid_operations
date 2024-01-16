@@ -33,7 +33,7 @@ gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer, "OutputFlag" => 0)
 # Number of hours: 1 - 8760
 # Fetch data: true/false, to parse input data (takes ~ 1 min.)
 
-scenario = "GA2030"
+scenario = "GA2040" 
 climate_year = "2007"
 fetch_data = true
 number_of_hours = 8760
@@ -72,23 +72,28 @@ for hour = 1:number_of_hours
     result["$hour"] = _PM.solve_opf(input_data, PowerModels.NFAPowerModel, gurobi) 
 end
 
+dirname(@__DIR__)
+
+#results_path = "/Users/rgalloca/Desktop/EU_results/"
+results_path = "/Users/rgalloca/OneDrive - KU Leuven/STERNA 2050/Simulation_Results" 
+
 ## Write out JSON files
 # Result file, with hourly results
 json_string = JSON.json(result)
-result_file_name = join(["./results/result_zonal_tyndp_", scenario,"_", climate_year, ".json"])
+result_file_name = join([results_path,"/result_zonal_tyndp_", scenario,"_", climate_year, ".json"])
 open(result_file_name,"w") do f
   JSON.print(f, json_string)
 end
 
 # Input data dictionary as .json file
-input_file_name = join(["./results/input_zonal_tyndp_", scenario,"_", climate_year, ".json"])
+input_file_name = join([results_path,"/input_zonal_tyndp_", scenario,"_", climate_year, ".json"])
 json_string = JSON.json(input_data_raw)
 open(input_file_name,"w") do f
   JSON.print(f, json_string)
 end
 
 # scenario file (e.g. zonal time series and installed capacities) as .json file
-scenario_file_name = join(["./results/scenario_zonal_tyndp_", scenario,"_", climate_year, ".json"])
+scenario_file_name = join([results_path,"/scenario_zonal_tyndp_", scenario,"_", climate_year, ".json"])
 json_string = JSON.json(nodal_data)
 open(scenario_file_name,"w") do f
   JSON.print(f, json_string)

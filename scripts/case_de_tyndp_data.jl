@@ -44,13 +44,16 @@ batch_size = 365
 ############ LOAD EU grid data
 include("../src/core/batch_opf.jl")
 file = "./data_sources/European_grid.json"
-results_path = "/Users/rgalloca/Desktop/EU_results/"  # Local path to results folder
+#results_path = "/Users/rgalloca/Desktop/EU_results/"  # Local path to results folder
+results_path = "/Users/rgalloca/OneDrive - KU Leuven/STERNA 2050/Simulation_Results"  # OneDrive results folder
+
 output_file_name = joinpath(results_path, join([use_case,"_",scenario,"_", climate_year]))
 output_file_name_inv = joinpath(results_path, join([use_case,"_",scenario,"_", climate_year,"_inv"]))
 plot_file_name = joinpath(results_path, "de_grid.pdf")
 # output_file_name = joinpath("results", join([use_case,"_",scenario,"_", climate_year]))
 # output_file_name_inv = joinpath("results", join([use_case,"_",scenario,"_", climate_year,"_inv"]))
 # plot_file_name = joinpath("results", "de_grid.pdf")
+
 gurobi = Gurobi.Optimizer
 EU_grid = _PM.parse_file(file)
 _PMACDC.process_additional_data!(EU_grid)
@@ -59,35 +62,53 @@ add_load_and_pst_properties!(EU_grid)
 
 #### LOAD TYNDP SCENARIO DATA ##########
 if load_data == true
-    zonal_result, zonal_input, scenario_data = _EUGO.load_results(scenario, climate_year) # Import zonal results
-    ntcs, zones, arcs, tyndp_capacity, tyndp_demand, gen_types, gen_costs, emission_factor, inertia_constants, start_up_cost, node_positions = _EUGO.get_grid_data(scenario) # import zonal input (mainly used for cost data)
-    pv, wind_onshore, wind_offshore = _EUGO.load_res_data()
+    zonal_result, zonal_input, scenario_data = load_results(scenario, climate_year) # Import zonal results
+    ntcs, zones, arcs, tyndp_capacity, tyndp_demand, gen_types, gen_costs, emission_factor, inertia_constants, start_up_cost, node_positions = get_grid_data(scenario) # import zonal input (mainly used for cost data)
+    pv, wind_onshore, wind_offshore = load_res_data()
 end
+#if load_data == true
+#    zonal_result, zonal_input, scenario_data = _EUGO.load_results(scenario, climate_year) # Import zonal results
+#    ntcs, zones, arcs, tyndp_capacity, tyndp_demand, gen_types, gen_costs, emission_factor, inertia_constants, start_up_cost, node_positions = _EUGO.get_grid_data(scenario) # import zonal input (mainly used for cost data)
+#    pv, wind_onshore, wind_offshore = _EUGO.load_res_data()
+#end
 print("ALL FILES LOADED", "\n")
 print("----------------------","\n")
 
 # map EU-Grid zones to TYNDP model zones
-zone_mapping = _EUGO.map_zones()
+#zone_mapping = _EUGO.map_zones()
+zone_mapping = map_zones()
 
 # Scale generation capacity based on TYNDP data
-_EUGO.scale_generation!(tyndp_capacity, EU_grid, scenario, climate_year, zone_mapping)
+#_EUGO.scale_generation!(tyndp_capacity, EU_grid, scenario, climate_year, zone_mapping)
+scale_generation!(tyndp_capacity, EU_grid, scenario, climate_year, zone_mapping)
 
 # For high impedance lines, set power rating to what is physically possible -> otherwise it leads to infeasibilities around XB lines
-_EUGO.fix_data!(EU_grid)
+#_EUGO.fix_data!(EU_grid)
+fix_data!(EU_grid)
+
+# Next two lines added during meeting on 15/01
+s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "fix_cross_border_flows" => true)
+
+result = _PMACDC.run_acdcopf(EU_grid,DCPPowerModel,gurobi,setting=s)
 
 # Isolate zone: input is vector of strings
-zone_grid = _EUGO.isolate_zones(EU_grid, ["DE"]; border_slack = 0.01)
-
+#zone_grid = _EUGO.isolate_zones(EU_grid, ["DE"]; border_slack = 0.01)
+zone_grid = isolate_zones(EU_grid, ["DE"]; border_slack = 0.01)
+result = _PMACDC.run_acdcopf(zone_grid,DCPPowerModel,gurobi,setting=s)
 # create RES time series based on the TYNDP model for 
 # (1) all zones, e.g.  create_res_time_series(wind_onshore, wind_offshore, pv, zone_mapping) 
 # (2) a specified zone, e.g. create_res_time_series(wind_onshore, wind_offshore, pv, zone_mapping; zone = "DE")
-timeseries_data = _EUGO.create_res_and_demand_time_series(wind_onshore, wind_offshore, pv, scenario_data, climate_year, zone_mapping; zone = "DE")
+
+#timeseries_data = _EUGO.create_res_and_demand_time_series(wind_onshore, wind_offshore, pv, scenario_data, climate_year, zone_mapping; zone = "DE")
+timeseries_data = create_res_and_demand_time_series(wind_onshore, wind_offshore, pv, scenario_data, climate_year, zone_mapping; zone = "DE")
 
 # Determine hourly cross-border flows and add them to time series data
-push!(timeseries_data, "xb_flows" => _EUGO.get_xb_flows(zone_grid, zonal_result, zonal_input, zone_mapping)) 
+#push!(timeseries_data, "xb_flows" => _EUGO.get_xb_flows(zone_grid, zonal_result, zonal_input, zone_mapping)) 
+push!(timeseries_data, "xb_flows" => get_xb_flows(zone_grid, zonal_result, zonal_input, zone_mapping))
 
 # Determine demand response potential and add them to zone_grid. Default cost value = 140 Euro / MWh, can be changed with get_demand_reponse!(...; cost = xx)
-_EUGO.get_demand_reponse!(zone_grid, zonal_input, zone_mapping, timeseries_data)
+#_EUGO.get_demand_reponse!(zone_grid, zonal_input, zone_mapping, timeseries_data)
+get_demand_reponse!(zone_grid, zonal_input, zone_mapping, timeseries_data)
 
 
 # There is no internal congestion as many of the lines are 5000 MVA, limit the lines....
@@ -105,7 +126,8 @@ end
 
 ###################
 #####  Adding HVDC links
-zone_grid_un = _EUGO.add_hvdc_links(zone_grid, links)
+#zone_grid_un = _EUGO.add_hvdc_links(zone_grid, links)
+zone_grid_un = add_hvdc_links(zone_grid, links)
 
 ### Carry out OPF
 # Start runnning hourly OPF calculations
