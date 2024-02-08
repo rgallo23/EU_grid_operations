@@ -5,7 +5,8 @@
 ## Import required functions - Some of them in later stages....
 using PowerModels; const _PM = PowerModels
 using PowerModelsACDC; const _PMACDC = PowerModelsACDC
-using EU_grid_operations; const _EUGO = EU_grid_operations
+#using EU_grid_operations; const _EUGO = EU_grid_operations
+include("functions.jl")
 
 using Plots
 import JuMP

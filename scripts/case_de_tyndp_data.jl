@@ -42,7 +42,7 @@ hour_end_idx = 8760
 batch_size = 365
 
 ############ LOAD EU grid data
-include("../src/core/batch_opf.jl")
+#include("../src/core/batch_opf.jl")  # Maybe not needed as it is part of EU_grid_operations
 file = "./data_sources/European_grid.json"
 #results_path = "/Users/rgalloca/Desktop/EU_results/"  # Local path to results folder
 results_path = "/Users/rgalloca/OneDrive - KU Leuven/STERNA 2050/Simulation_Results"  # OneDrive results folder
