@@ -28,7 +28,7 @@ import StatsPlots
 #using EU_grid_operations
 
 ######### DEFINE INPUT PARAMETERS
-scenario = "GA2030"
+scenario = "GA2040" # Changed from 2030
 climate_year = "2007"
 load_data = true
 use_case = "de_hvdc_backbone"

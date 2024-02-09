@@ -2,7 +2,8 @@
 using PowerModels; const _PM = PowerModels
 using PowerModelsACDC; const _PMACDC = PowerModelsACDC
 using Gurobi
-using EU_grid_operations; const _EUGO = EU_grid_operations
+#using EU_grid_operations; const _EUGO = EU_grid_operations
+include("functions.jl")
 using JSON
 import CbaOPF
 using Plots
@@ -10,7 +11,8 @@ using Plots
 
 # creat the json file of the grid on the default folder, e.g. data_sources/European_grid.json
 # output filename can be specified with  _EUGO.create_european_grid(output_filename = "filepath/filename")
-_EUGO.create_european_grid()
+#_EUGO.create_european_grid()
+create_european_grid()
 
 # Load the EU grid file 
 file = "./data_sources/European_grid.json"

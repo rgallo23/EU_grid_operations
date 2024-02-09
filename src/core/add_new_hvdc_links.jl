@@ -160,3 +160,30 @@ function add_dc_branch!(grid_data, fbus_dc, tbus_dc, power_rating; status = 1, r
 
     return grid_data
 end
+
+# Function to add superconductor cable - need to replace r with cooling power losses
+# Calculation of equivalent resistance could be an additional function
+function add_sc_branch!(grid_data, dc_voltage, fbus_dc, tbus_dc, power_rating, cooling_power; status = 1, branch_id = nothing)
+    if isnothing(branch_id)
+        dc_br_idx = maximum([branch["index"] for (br, branch) in grid_data["branchdc"]]) + 1
+    else
+        dc_br_idx = branch_id
+    end
+
+    sc_cable_length = latlon2distance(grid_data, fbus_dc, tbus_dc)
+    r = sc_cable_length*cooling_power/dc_voltage^2 # Equivalent resistance using cooling losses and voltage level
+
+    grid_data["branchdc"]["$dc_br_idx"] = Dict{String, Any}()
+    grid_data["branchdc"]["$dc_br_idx"]["fbusdc"] = fbus_dc
+    grid_data["branchdc"]["$dc_br_idx"]["tbusdc"] = tbus_dc
+    grid_data["branchdc"]["$dc_br_idx"]["r"] = r
+    grid_data["branchdc"]["$dc_br_idx"]["l"] = 0   # zero in steady state
+    grid_data["branchdc"]["$dc_br_idx"]["c"] = 0 # zero in steady state
+    grid_data["branchdc"]["$dc_br_idx"]["rateA"] = power_rating
+    grid_data["branchdc"]["$dc_br_idx"]["rateB"] = power_rating
+    grid_data["branchdc"]["$dc_br_idx"]["rateC"] = power_rating
+    grid_data["branchdc"]["$dc_br_idx"]["status"] = status
+    grid_data["branchdc"]["$dc_br_idx"]["index"] = dc_br_idx
+
+    return grid_data    
+end

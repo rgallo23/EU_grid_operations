@@ -89,12 +89,30 @@ fix_data!(EU_grid)
 # Next two lines added during meeting on 15/01
 s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "fix_cross_border_flows" => true)
 
-result = _PMACDC.run_acdcopf(EU_grid,DCPPowerModel,gurobi,setting=s)
+result_EU = _PMACDC.run_acdcopf(EU_grid,DCPPowerModel,gurobi,setting=s)
 
 # Isolate zone: input is vector of strings
 #zone_grid = _EUGO.isolate_zones(EU_grid, ["DE"]; border_slack = 0.01)
 zone_grid = isolate_zones(EU_grid, ["DE"]; border_slack = 0.01)
-result = _PMACDC.run_acdcopf(zone_grid,DCPPowerModel,gurobi,setting=s)
+result_DE = _PMACDC.run_acdcopf(zone_grid,DCPPowerModel,gurobi,setting=s)
+
+# Save EU and DE results in cloud folder
+# EU result was infeasable and DE isolate was feasable
+results_path = "/Users/rgalloca/OneDrive - KU Leuven/STERNA 2050/Simulation_Results" 
+
+json_string = JSON.json(result_EU)
+result_file_name = join([results_path,"/result_ACDCOPF_EU_grid.json"])
+open(result_file_name,"w") do f
+  JSON.print(f, json_string)
+end
+
+json_string = JSON.json(result_DE)
+result_file_name = join([results_path,"/result_ACDCOPF_DE_grid.json"])
+open(result_file_name,"w") do f
+  JSON.print(f, json_string)
+end  
+
+
 # create RES time series based on the TYNDP model for 
 # (1) all zones, e.g.  create_res_time_series(wind_onshore, wind_offshore, pv, zone_mapping) 
 # (2) a specified zone, e.g. create_res_time_series(wind_onshore, wind_offshore, pv, zone_mapping; zone = "DE")

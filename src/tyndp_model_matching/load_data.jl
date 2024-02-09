@@ -5,32 +5,33 @@
 #############################################################################
 
 function load_res_data()
- ## RES TIME SERIES as feather files (~ 350 MB)
- # DOWNLOAD FILES AND ADD THEM TO YOUR data_sources FOLDER
- # wind_onshore_file_link = "https://zenodo.org/record/3702418/files/PECD-MAF2019-wide-WindOnshore.feather?download=1"
- # wind_offhore_file_link = "https://zenodo.org/record/3702418/files/PECD-MAF2019-wide-WindOffshore.feather?download=1"
- # pv_file_link = "https://zenodo.org/record/3702418/files/PECD-MAF2019-wide-PV.feather?download=1" 
+## RES TIME SERIES as feather files (~ 350 MB)
+# DOWNLOAD FILES AND ADD THEM TO YOUR data_sources FOLDER
+# wind_onshore_file_link = "https://zenodo.org/record/3702418/files/PECD-MAF2019-wide-WindOnshore.feather?download=1"
+# wind_offhore_file_link = "https://zenodo.org/record/3702418/files/PECD-MAF2019-wide-WindOffshore.feather?download=1"
+# pv_file_link = "https://zenodo.org/record/3702418/files/PECD-MAF2019-wide-PV.feather?download=1" 
 
- # If files are saved locally under folder scenarios
- # Path of data source
- path = "C:/Users/rgalloca/Desktop/Ricardo/EU_data_source" 
+# If files are saved locally under folder scenarios
+# Path of data source
+#path = "C:/Users/rgalloca/Desktop/Ricardo/EU_data_source" # Local data
+path = "/Users/rgalloca/OneDrive - KU Leuven/STERNA 2050/Simulation_data_source" # Cloud data
 
- file_wind_onshore  = joinpath(path,"PECD-MAF2019-wide-WindOnshore.feather") 
- file_wind_offshore = joinpath(path,"PECD-MAF2019-wide-WindOffshore.feather")
- file_pv            = joinpath(path, "PECD-MAF2019-wide-PV.feather")   
+file_wind_onshore  = joinpath(path,"PECD-MAF2019-wide-WindOnshore.feather") 
+file_wind_offshore = joinpath(path,"PECD-MAF2019-wide-WindOffshore.feather")
+file_pv            = joinpath(path, "PECD-MAF2019-wide-PV.feather")   
 
 #  file_wind_onshore  = "./data_sources/PECD-MAF2019-wide-WindOnshore.feather"
 #  file_wind_offshore = "./data_sources/PECD-MAF2019-wide-WindOffshore.feather"
 #  file_pv            = "./data_sources/PECD-MAF2019-wide-PV.feather"              
 
- pv = Feather.read(file_pv) 
- wind_onshore = Feather.read(file_wind_onshore)
- wind_offshore = Feather.read(file_wind_offshore)
+pv = Feather.read(file_pv) 
+wind_onshore = Feather.read(file_wind_onshore)
+wind_offshore = Feather.read(file_wind_offshore)
 
- # Alternatively one can use to download data: (this might take a couple of minutes)
- # pv = Feather.read(download(pv_file_link))
- # wind_onshore = Feather.read(download(wind_onshore_file_link))
- # wind_offshore = Feather.read(download(wind_offshore_file_link))
+# Alternatively one can use to download data: (this might take a couple of minutes)
+# pv = Feather.read(download(pv_file_link))
+# wind_onshore = Feather.read(download(wind_onshore_file_link))
+# wind_offshore = Feather.read(download(wind_offshore_file_link))
 
  return pv, wind_onshore, wind_offshore
 end
@@ -62,8 +63,9 @@ function process_RES_time_series(wind_onshore,wind_offshore,pv,corrected_year) #
 end
 
 function add_load_series(scenario,year,hour_start,number_of_hours)
-     # Path of data source
-    path = "C:/Users/rgalloca/Desktop/Ricardo/EU_data_source" 
+    # Path of data source
+    #path = "C:/Users/rgalloca/Desktop/Ricardo/EU_data_source" 
+    path = "/Users/rgalloca/OneDrive - KU Leuven/STERNA 2050/Simulation_data_source" 
     #load_file = joinpath("/Users/giacomobastianel/Desktop/tyndpdata/scenarios/"*scenario*"_Demand_CY"*year*".csv")
     load_file = joinpath(path, join([scenario,"_Demand_CY",year,".csv"]))
     df = CSV.read(load_file,DataFrame)

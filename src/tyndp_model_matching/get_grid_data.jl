@@ -10,8 +10,11 @@
 
 function get_grid_data(scenario)  
 # Path of data source
-path = "C:/Users/rgalloca/Desktop/Ricardo/EU_data_source"   
-# data source: https://www.entsoe.eu/Documents/TYNDP%20documents/TYNDP2020/Reference%20Grid%202025%20-%20TYNDP%202020.xlsx    
+#path = "C:/Users/rgalloca/Desktop/Ricardo/EU_data_source" # Local data
+path = "/Users/rgalloca/OneDrive - KU Leuven/STERNA 2050/Simulation_data_source" # Cloud data  
+
+# data source: https://www.entsoe.eu/Documents/TYNDP%20documents/TYNDP2020/Reference%20Grid%202025%20-%20TYNDP%202020.xlsx
+    
 file_lines = "./data_sources/Reference Grid 2025 - TYNDP 2020.xls"
 #file_lines = string(path,"/Reference Grid 2025 - TYNDP 2020.xls")
 # data source: https://2020.entsos-tyndp-scenarios.eu/wp-content/uploads/2020/06/TYNDP-2020-Scenario-Datafile.xlsx.zip

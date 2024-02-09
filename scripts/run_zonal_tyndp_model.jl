@@ -33,8 +33,8 @@ gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer, "OutputFlag" => 0)
 # Number of hours: 1 - 8760
 # Fetch data: true/false, to parse input data (takes ~ 1 min.)
 
-scenario = "GA2040" 
-climate_year = "2007"
+scenario = "GA2040"
+climate_year = "1984"
 fetch_data = true
 number_of_hours = 8760
 
